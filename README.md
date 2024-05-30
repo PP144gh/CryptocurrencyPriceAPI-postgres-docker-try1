@@ -1,10 +1,20 @@
-uphold assessment
+# uphold assessment
 
-npm run build in root
+## instructions:
 
-npm start in root to run backend
+### in root:
 
-npm start in uphold/frontend to run frontend
+npm install
 
-to acess frontend in browser: http://localhost:3000/ 
+npm run build
+
+npm start
+
+### in uphold/frontend (to run frontend)
+
+npm start
+
+### to acess frontend in browser: 
+
+http://localhost:3000/ 
 
