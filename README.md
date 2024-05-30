@@ -1,9 +1,10 @@
-PoC for solution to manage authorisations using credentials and dids on KILT. frontend + backend fully functional. backend runs typescript scripts that call blockchain APIs.
+uphold assessment
 
-npm run build in kilt_poc
+npm run build in root
 
-npm start in kilt_poc to run backend
+npm start in root to run backend
 
-npm start in kilt_poc/frontend to run frontend
+npm start in uphold/frontend to run frontend
 
-browser: http://localhost:3000/ frontend
+to acess frontend in browser: http://localhost:3000/ 
+

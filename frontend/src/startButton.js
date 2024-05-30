@@ -1,23 +1,31 @@
 import React from 'react';
 
-function StartButton({ updateData }) { // Accept updateData as a prop
+function StartButton({ updateData, inputs }) { 
+
+  console.log(JSON.stringify(inputs))
 
   const handleButtonClick = async () => {
     try {
-      const response = await fetch('http://localhost:3001/createAccount');
-      let responseData = await response.json();
+      const response = await fetch('http://localhost:3001/start', {
+        method: 'POST', 
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(inputs) 
+      });
 
-    
+      const responseData = await response.json();
 
       updateData(prevData => ({
         ...prevData,
-        mnemonic: responseData.mnemonic,
-        address: responseData.address,
-        balance: responseData.balance,
-        DIDmnemonic: '',
-        DIDuri: ''
-      })); // Update mnemonic, address, and balance in the data
-      
+        pair: responseData.pair,
+        fetchInterval: responseData.fetchInterval,
+        priceOscillationTrigger: responseData.priceOscillationTrigger,
+        priceOscillation: responseData.priceOscillation,
+        price: responseData.price,
+        timestamp: responseData.timestamp
+      }));
+
       console.log(responseData);
 
     } catch (error) {

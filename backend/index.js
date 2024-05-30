@@ -1,8 +1,8 @@
 const path = require('path');
 const express = require('express');
 const cors = require('cors');
-
 const { exec } = require('child_process');
+const bodyParser = require('body-parser');
 
 
 
@@ -23,11 +23,13 @@ app.use(express.static(path.resolve(__dirname, '../frontend/build')));
 app.use(express.json()); // To parse JSON bodies
 
 
-const extractValue = (key, string) => {
-  const regex = new RegExp(`${key}="([^"]+)"`);
-  const match = string.match(regex);
+// Helper function to extract value from the script output
+function extractValue(key, output) {
+  const regex = new RegExp(`${key}=([^\\s]+)`);
+  const match = output.match(regex);
   return match ? match[1] : null;
-};
+}
+
 
 
 
@@ -43,8 +45,20 @@ app.get("/api", (req, res) => {
 }
 */
 
-app.get('/createAccount', (req, res) => {
-  exec('yarn ts-node ./backend/scripts/attester/generateAccount.ts', (error, stdout, stderr) => {
+app.use(bodyParser.json());
+
+app.post('/start', (req, res) => {
+  const { pair, fetchInterval, priceOscillationTrigger } = req.body;
+
+  console.log(req.body)
+
+  if (!pair || !fetchInterval || !priceOscillationTrigger) {
+    return res.status(400).send('Missing required fields');
+  }
+
+  const command = `node ./backend/scripts/start.js ${pair} ${fetchInterval} ${priceOscillationTrigger}`;
+
+  exec(command, (error, stdout, stderr) => {
     if (error) {
       console.error(`exec error: ${error}`);
       return res.status(500).send('Error executing script');
@@ -54,68 +68,43 @@ app.get('/createAccount', (req, res) => {
       return res.status(500).send('Script execution returned an error');
     }
     console.log(`stdout: ${stdout}`);
-    const mnemonic = extractValue("ATTESTER_ACCOUNT_MNEMONIC", stdout);
-    const address = extractValue("ATTESTER_ACCOUNT_ADDRESS", stdout);
+    const responseData = JSON.parse(stdout);
+    res.send(responseData);
+  });
+});
 
-      // Add a balance field with value 0 to the data object, new account so balance is always 0
-    const balance = 0;
+app.get('/price/:pair', (req, res) => {
+  const pair = req.params.pair;
 
-    const result = JSON.stringify({ mnemonic, address, balance}, null, 2);
+  const command = `node ./backend/scripts/priceAlerts.js ${pair}`;
+
+  exec(command, (error, stdout, stderr) => {
+    if (error) {
+      console.error(`exec error: ${error}`);
+      return res.status(500).send('Error executing script');
+    }
+    if (stderr) {
+      console.error(`stderr: ${stderr}`);
+      return res.status(500).send('Script execution returned an error');
+    }
+    console.log(`stdout: ${stdout}`);
+    const pair = extractValue("PAIR", stdout);
+    const price = extractValue("PRICE", stdout);
+    const timestamp = extractValue("TIMESTAMP", stdout);
+    const fetchInterval = 60000; // 60 seconds
+    const priceOscillationTrigger = 0.05; // 5%
+    const priceOscillation = 0.02; // 2%
+
+    const result = {
+      pair: pair,
+      price: price,
+      timestamp: timestamp
+    };
     console.log(result);
     res.send(result); // Send the output of the script to the client
   })
-});
 
 
-
-app.post('/registerDID', (req, res) => {
-  const address = req.query.address;
-  const mnemonic = req.body.mnemonic;
-  if (!mnemonic || typeof mnemonic !== 'string') {
-    res.status(400).send('Mnemonic is required');
-    return;
-  }
-
-  const execPromise = (command) => new Promise((resolve, reject) => {
-    exec(command, (error, stdout, stderr) => {
-      if (error) {
-        console.error(`exec error: ${error}`);
-        reject('Error executing command');
-      } else {
-        resolve(stderr + stdout); // Combine both stderr and stdout
-      }
-    });
-  });
-
-  execPromise(`yarn ts-node ./backend/scripts/attester/generateDid.ts "${mnemonic}" ${address}`)
-    .then(output => {
-      console.log(output);
-      const outputLines = output.trim().split('\n');
-      let didUri, balance, attesterDidMnemonic;
-
-      outputLines.forEach(line => {
-        if (line.includes('ATTESTER_DID_URI')) {
-          didUri = line.split('"')[1]; // Assuming the URI is enclosed in quotes
-        } else if (line.includes('Balance for')) {
-          balance = line.split(':').pop().trim();
-        } else if (line.includes('ATTESTER_DID_MNEMONIC=')) {
-          attesterDidMnemonic = line.split('ATTESTER_DID_MNEMONIC=')[1].trim(); // Extracting the mnemonic
-        }
-      });
-
-      if (!didUri) {
-        throw new Error('DID URI not found');
-      }
-
-      res.json({
-        DIDmnemonic: attesterDidMnemonic, // Using the extracted mnemonic here
-        DIDuri: didUri,
-        balance: balance
-      });
-    })
-    .catch(errorMessage => {
-      res.status(500).send(errorMessage);
-    });
 });
 
 
