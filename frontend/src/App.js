@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./App.css";
 import StartButton from './startButton';
 
@@ -8,30 +8,62 @@ function App() {
     fetchInterval: null,
     priceOscillationTrigger: null,
     priceOscillation: null,
-    price: null,
-    timestamp: ''
+    timestamp: '',
+    running: true
   });
 
-// State for the input fields
-const [inputs, setInputs] = useState({
-  pair: '',
-  fetchInterval: '',
-  priceOscillationTrigger: ''
-});
-
-const handleChange = (e) => {
-  const { name, value } = e.target;
-  setInputs({
-    ...inputs,
-    [name]: value
+  // State for the input fields
+  const [inputs, setInputs] = useState({
+    pair: '',
+    fetchInterval: '',
+    priceOscillationTrigger: ''
   });
-};
 
-  const alerts = [
-    { pair: 'fill', interval: 'fill', priceOscillation: 'fill', timestamp: 'fill' },
-    { pair: 'fill', interval: 'fill', priceOscillation: 'fill', timestamp: 'fill' },
-  ];
+  // State for alerts list
+  const [alerts, setAlerts] = useState([]);
 
+  // Update alerts whenever data changes
+  useEffect(() => {
+    if (data.timestamp !== '') {
+      setAlerts(prevAlerts => [
+        ...prevAlerts,
+        {
+          pair: data.pair,
+          interval: data.fetchInterval,
+          priceOscillation: data.priceOscillation,
+          timestamp: data.timestamp
+        }
+      ]);
+    }
+  }, [data]);
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setInputs({
+      ...inputs,
+      [name]: value
+    });
+  };
+
+  const handleStartButtonClick = () => {
+    // Add new line to alerts list
+    setAlerts([
+      ...alerts,
+      {
+        pair: inputs.pair,
+        interval: inputs.fetchInterval,
+        priceOscillation: inputs.priceOscillationTrigger,
+        timestamp: data.timestamp
+      }
+    ]);
+
+    // Clear input fields after adding to alerts list
+    setInputs({
+      pair: '',
+      fetchInterval: '',
+      priceOscillationTrigger: ''
+    });
+  };
 
   return (
     <div className="App">
@@ -69,7 +101,7 @@ const handleChange = (e) => {
         </div>
 
         <div className="button-row">
-          <StartButton data={data} updateData={setData} inputs={inputs} />
+          <StartButton data={data} updateData={setData} inputs={inputs} onStart={handleStartButtonClick} />
         </div>
 
         <div className="alertss-table">
@@ -78,8 +110,8 @@ const handleChange = (e) => {
             <thead>
               <tr>
                 <th>Pair</th>
-                <th>Fetch Interval</th>
-                <th>Price Oscillation</th>
+                <th>Fetch Interval (ms)</th>
+                <th>Price Oscillation (%)</th>
                 <th>Timestamp</th>
               </tr>
             </thead>

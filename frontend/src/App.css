@@ -1,38 +1,70 @@
+/* App.css */
+
+body {
+  background-color: #ffffff; /* White */
+}
+
 .App {
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
 .App-header {
-  background-color: #282c34;
+  background-color: #2185d0; /* Semantic UI blue */
   min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   font-size: calc(10px + 2vmin);
-  color: white;
+  color: #ffffff; /* White */
 }
 
 .App-link {
-  color: #61dafb;
+  color: #e0e14a; /* Semantic UI yellow */
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.alertss-table {
+  margin-top: 20px;
+}
+
+.alertss-table table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.alertss-table th,
+.alertss-table td {
+  padding: 8px;
+  border-bottom: 1px solid #ffffff; /* White */
+  border-right: 1px solid #ffffff; /* White */
+}
+
+.alertss-table th:last-child,
+.alertss-table td:last-child {
+  border-right: none; /* Remove right border for last column */
+}
+
+.alertss-table th {
+  background-color: #2185d0; /* Semantic UI blue */
+  color: #ffffff; /* White */
+  text-align: left;
+}
+
+.alertss-table tbody tr:hover {
+  background-color: #f2f2f2; /* Light gray */
+}
+
+.alertss-table tbody tr:nth-child(even) {
+  background-color: #2185d0; /* Light gray */
+}
+
+/* Optional: Increase padding for header cells */
+.alertss-table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}
+
+/* Optional: Center text in table cells */
+.alertss-table td {
+  text-align: center;
 }

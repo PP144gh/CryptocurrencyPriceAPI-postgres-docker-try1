@@ -2,7 +2,6 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { exec } = require('child_process');
-const bodyParser = require('body-parser');
 
 
 
@@ -22,30 +21,12 @@ app.use(express.static(path.resolve(__dirname, '../frontend/build')));
 
 app.use(express.json()); // To parse JSON bodies
 
-
 // Helper function to extract value from the script output
 function extractValue(key, output) {
   const regex = new RegExp(`${key}=([^\\s]+)`);
   const match = output.match(regex);
   return match ? match[1] : null;
 }
-
-
-
-
-
-// Handle GET requests to /api route
-app.get("/api", (req, res) => {
-  res.json({ message: "Hello from server!" });
-});
-
-//go to http://localhost:3001/api, should see
-/* {
-"message": "Hello from server!"
-}
-*/
-
-app.use(bodyParser.json());
 
 app.post('/start', (req, res) => {
   const { pair, fetchInterval, priceOscillationTrigger } = req.body;
@@ -68,8 +49,17 @@ app.post('/start', (req, res) => {
       return res.status(500).send('Script execution returned an error');
     }
     console.log(`stdout: ${stdout}`);
-    const responseData = JSON.parse(stdout);
-    res.send(responseData);
+    const priceOscillation = extractValue("PRICE OSCILLATION", stdout);
+    const timestamp = extractValue("TIMESTAMP", stdout);
+
+    const result = {
+      pair,
+      fetchInterval,
+      priceOscillationTrigger,
+      priceOscillation: parseFloat(priceOscillation),
+      timestamp
+    };
+    res.send(result);
   });
 });
 
@@ -87,21 +77,18 @@ app.get('/price/:pair', (req, res) => {
       console.error(`stderr: ${stderr}`);
       return res.status(500).send('Script execution returned an error');
     }
-    console.log(`stdout: ${stdout}`);
+    //console.log(`stdout: ${stdout}`);
     const pair = extractValue("PAIR", stdout);
     const price = extractValue("PRICE", stdout);
     const timestamp = extractValue("TIMESTAMP", stdout);
-    const fetchInterval = 60000; // 60 seconds
-    const priceOscillationTrigger = 0.05; // 5%
-    const priceOscillation = 0.02; // 2%
 
     const result = {
       pair: pair,
       price: price,
       timestamp: timestamp
     };
-    console.log(result);
-    res.send(result); // Send the output of the script to the client
+    //console.log(result);
+    res.send(result);
   })
 
 
