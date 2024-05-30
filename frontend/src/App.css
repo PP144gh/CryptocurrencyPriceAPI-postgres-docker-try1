@@ -23,48 +23,48 @@ body {
   color: #e0e14a; /* Semantic UI yellow */
 }
 
-.alertss-table {
+.alerts-table {
   margin-top: 20px;
 }
 
-.alertss-table table {
+.alerts-table table {
   border-collapse: collapse;
   width: 100%;
 }
 
-.alertss-table th,
-.alertss-table td {
+.alerts-table th,
+.alerts-table td {
   padding: 8px;
   border-bottom: 1px solid #ffffff; /* White */
   border-right: 1px solid #ffffff; /* White */
 }
 
-.alertss-table th:last-child,
-.alertss-table td:last-child {
+.alerts-table th:last-child,
+.alerts-table td:last-child {
   border-right: none; /* Remove right border for last column */
 }
 
-.alertss-table th {
+.alerts-table th {
   background-color: #2185d0; /* Semantic UI blue */
   color: #ffffff; /* White */
   text-align: left;
 }
 
-.alertss-table tbody tr:hover {
+.alerts-table tbody tr:hover {
   background-color: #f2f2f2; /* Light gray */
 }
 
-.alertss-table tbody tr:nth-child(even) {
-  background-color: #2185d0; /* Light gray */
+.alerts-table tbody tr:nth-child(even) {
+  background-color: #cce0ff; /* Light blue */
 }
 
 /* Optional: Increase padding for header cells */
-.alertss-table th {
+.alerts-table th {
   padding-top: 12px;
   padding-bottom: 12px;
 }
 
 /* Optional: Center text in table cells */
-.alertss-table td {
+.alerts-table td {
   text-align: center;
 }

@@ -22,21 +22,22 @@ function App() {
   // State for alerts list
   const [alerts, setAlerts] = useState([]);
 
-  // Update alerts whenever data changes
+  // Update alerts whenever data changes and timestamp is different from the previous one
   useEffect(() => {
-    if (data.timestamp !== '') {
+    if (data.running && data.timestamp !== '' && (alerts.length === 0 || alerts[alerts.length - 1].timestamp !== data.timestamp)) {
       setAlerts(prevAlerts => [
         ...prevAlerts,
         {
           pair: data.pair,
           interval: data.fetchInterval,
           priceOscillation: data.priceOscillation,
+          priceOscillationTrigger: data.priceOscillationTrigger,
           price: data.price,
           timestamp: data.timestamp
         }
       ]);
     }
-  }, [data]);
+  }, [data, alerts]);
 
   // Handle input changes
   const handleChange = (e) => {
@@ -141,7 +142,7 @@ function App() {
           <button onClick={handleStopButtonClick} disabled={!data.running}>Stop</button>
         </div>
 
-        <div className="alertss-table">
+        <div className="alerts-table">
           <h2>Alerts List</h2>
           <table>
             <thead>
@@ -149,8 +150,9 @@ function App() {
                 <th>Pair</th>
                 <th>Fetch Interval (ms)</th>
                 <th>Price Oscillation (%)</th>
-                <th>Price</th>
-                <th>Timestamp</th>
+                <th>Price Oscillation Trigger (%)</th>
+                <th>Price (USD)</th>
+                <th>Timestamp (ISO)</th>
               </tr>
             </thead>
             <tbody>
@@ -159,6 +161,7 @@ function App() {
                   <td>{alert.pair}</td>
                   <td>{alert.interval}</td>
                   <td>{alert.priceOscillation}</td>
+                  <td>{alert.priceOscillationTrigger}</td>
                   <td>{alert.price}</td>
                   <td>{alert.timestamp}</td>
                 </tr>

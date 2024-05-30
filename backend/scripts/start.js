@@ -36,6 +36,7 @@ const monitorPrice = async () => {
           priceOscillation = parseFloat(changePercent.toFixed(4));
           alert = true;
           console.log(`PRICE OSCILLATION=${priceOscillation}`);
+          console.log(`PRICE=${newPrice}`);
           console.log(`TIMESTAMP=${newPriceTimestamp}`);
         }
 

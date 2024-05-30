@@ -50,6 +50,7 @@ app.post('/start', (req, res) => {
     }
     console.log(`stdout: ${stdout}`);
     const priceOscillation = extractValue("PRICE OSCILLATION", stdout);
+    const price = extractValue("PRICE", stdout);
     const timestamp = extractValue("TIMESTAMP", stdout);
 
     const result = {
@@ -57,6 +58,7 @@ app.post('/start', (req, res) => {
       fetchInterval,
       priceOscillationTrigger,
       priceOscillation: parseFloat(priceOscillation),
+      price : parseFloat(price).toFixed(4),
       timestamp
     };
     res.send(result);
