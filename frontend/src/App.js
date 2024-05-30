@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import "./App.css";
-import StartButton from './startButton';
 
 function App() {
   const [data, setData] = useState({
@@ -8,8 +7,9 @@ function App() {
     fetchInterval: null,
     priceOscillationTrigger: null,
     priceOscillation: null,
+    price: null,
     timestamp: '',
-    running: true
+    running: false
   });
 
   // State for the input fields
@@ -31,12 +31,14 @@ function App() {
           pair: data.pair,
           interval: data.fetchInterval,
           priceOscillation: data.priceOscillation,
+          price: data.price,
           timestamp: data.timestamp
         }
       ]);
     }
   }, [data]);
 
+  // Handle input changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setInputs({
@@ -45,24 +47,58 @@ function App() {
     });
   };
 
-  const handleStartButtonClick = () => {
-    // Add new line to alerts list
-    setAlerts([
-      ...alerts,
-      {
-        pair: inputs.pair,
-        interval: inputs.fetchInterval,
-        priceOscillation: inputs.priceOscillationTrigger,
-        timestamp: data.timestamp
-      }
-    ]);
+  // Handle start button click
+  const handleStartButtonClick = useCallback(async () => {
+    try {
+      const response = await fetch('http://localhost:3001/start', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(inputs)
+      });
 
-    // Clear input fields after adding to alerts list
-    setInputs({
-      pair: '',
-      fetchInterval: '',
-      priceOscillationTrigger: ''
-    });
+      const responseData = await response.json();
+
+      setData(prevData => ({
+        ...prevData,
+        pair: responseData.pair,
+        fetchInterval: responseData.fetchInterval,
+        priceOscillationTrigger: responseData.priceOscillationTrigger,
+        priceOscillation: responseData.priceOscillation,
+        price: responseData.price,
+        timestamp: responseData.timestamp
+      }));
+
+      console.log(responseData);
+
+    } catch (error) {
+      console.error(error);
+    }
+  }, [inputs]);
+
+  // Handle automatic restart
+  useEffect(() => {
+    if (data.running && data.timestamp !== '') {
+      handleStartButtonClick();
+    }
+  }, [data.timestamp, data.running, handleStartButtonClick]);
+
+  // Handle start button click to start the loop
+  const startLoop = () => {
+    setData(prevData => ({
+      ...prevData,
+      running: true
+    }));
+    handleStartButtonClick();
+  };
+
+  // Handle stop button click
+  const handleStopButtonClick = () => {
+    setData(prevData => ({
+      ...prevData,
+      running: false
+    }));
   };
 
   return (
@@ -101,7 +137,8 @@ function App() {
         </div>
 
         <div className="button-row">
-          <StartButton data={data} updateData={setData} inputs={inputs} onStart={handleStartButtonClick} />
+          <button onClick={startLoop} disabled={data.running}>Start</button>
+          <button onClick={handleStopButtonClick} disabled={!data.running}>Stop</button>
         </div>
 
         <div className="alertss-table">
@@ -112,6 +149,7 @@ function App() {
                 <th>Pair</th>
                 <th>Fetch Interval (ms)</th>
                 <th>Price Oscillation (%)</th>
+                <th>Price</th>
                 <th>Timestamp</th>
               </tr>
             </thead>
@@ -121,6 +159,7 @@ function App() {
                   <td>{alert.pair}</td>
                   <td>{alert.interval}</td>
                   <td>{alert.priceOscillation}</td>
+                  <td>{alert.price}</td>
                   <td>{alert.timestamp}</td>
                 </tr>
               ))}
