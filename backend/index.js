@@ -37,7 +37,7 @@ app.post('/start', (req, res) => {
     return res.status(400).send('Missing required fields');
   }
 
-  const command = `node ./backend/scripts/start.js ${pair} ${fetchInterval} ${priceOscillationTrigger}`;
+  const command = `node ./backend/scripts/monitorPrice.js ${pair} ${fetchInterval} ${priceOscillationTrigger}`;
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
@@ -68,7 +68,7 @@ app.post('/start', (req, res) => {
 app.get('/price/:pair', (req, res) => {
   const pair = req.params.pair;
 
-  const command = `node ./backend/scripts/priceAlerts.js ${pair}`;
+  const command = `node ./backend/scripts/priceFetch.js ${pair}`;
 
   exec(command, (error, stdout, stderr) => {
     if (error) {
