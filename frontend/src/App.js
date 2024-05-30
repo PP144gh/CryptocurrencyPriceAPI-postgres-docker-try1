@@ -3,29 +3,27 @@ import "./App.css";
 
 function App() {
   const [data, setData] = useState({
-    pair: '',
+    pair: "",
     fetchInterval: null,
     priceOscillationTrigger: null,
     priceOscillation: null,
     price: null,
-    timestamp: '',
-    running: false
+    timestamp: "",
+    running: false,
   });
 
-  // State for the input fields
   const [inputs, setInputs] = useState({
-    pair: '',
-    fetchInterval: '',
-    priceOscillationTrigger: ''
+    pair: "",
+    fetchInterval: "",
+    priceOscillationTrigger: "",
   });
 
-  // State for alerts list
   const [alerts, setAlerts] = useState([]);
+  const [errorMessage, setErrorMessage] = useState(null);
 
-  // Update alerts whenever data changes and timestamp is different from the previous one
   useEffect(() => {
-    if (data.running && data.timestamp !== '' && (alerts.length === 0 || alerts[alerts.length - 1].timestamp !== data.timestamp)) {
-      setAlerts(prevAlerts => [
+    if (data.running && data.timestamp !== "" && (alerts.length === 0 || alerts[alerts.length - 1].timestamp !== data.timestamp)) {
+      setAlerts((prevAlerts) => [
         ...prevAlerts,
         {
           pair: data.pair,
@@ -33,72 +31,90 @@ function App() {
           priceOscillation: data.priceOscillation,
           priceOscillationTrigger: data.priceOscillationTrigger,
           price: data.price,
-          timestamp: data.timestamp
-        }
+          timestamp: data.timestamp,
+        },
       ]);
     }
   }, [data, alerts]);
 
-  // Handle input changes
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setInputs({
-      ...inputs,
-      [name]: value
-    });
-  };
+const handleChange = (e) => {
+  const { name, value } = e.target;
+  let newValue = value;
 
-  // Handle start button click
+  // Input validation based on the input name
+  switch (name) {
+    case "pair":
+      // Allow only letters and hyphens in pair input
+      newValue = value.replace(/[^a-zA-Z-]/g, "");
+      break;
+    case "fetchInterval":
+    case "priceOscillationTrigger":
+    // Allow only numbers (0-9) and dot (.) in fetchInterval and priceOscillationTrigger inputs
+    newValue = value.replace(/[^\d.]/g, "");
+
+      break;
+    default:
+      break;
+  }
+
+  // Update the state with the validated value
+  setInputs({
+    ...inputs,
+    [name]: newValue,
+  });
+};
+
+
   const handleStartButtonClick = useCallback(async () => {
     try {
-      const response = await fetch('http://localhost:3001/start', {
-        method: 'POST',
+      const response = await fetch("http://localhost:3001/start", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json'
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(inputs)
+        body: JSON.stringify(inputs),
       });
+
+      if (!response.ok) {
+        throw new Error("Failed to start: " + response.statusText);
+      }
 
       const responseData = await response.json();
 
-      setData(prevData => ({
+      setData((prevData) => ({
         ...prevData,
         pair: responseData.pair,
         fetchInterval: responseData.fetchInterval,
         priceOscillationTrigger: responseData.priceOscillationTrigger,
         priceOscillation: responseData.priceOscillation,
         price: responseData.price,
-        timestamp: responseData.timestamp
+        timestamp: responseData.timestamp,
       }));
 
       console.log(responseData);
-
     } catch (error) {
-      console.error(error);
+      setErrorMessage(error.message);
     }
   }, [inputs]);
 
-  // Handle automatic restart
   useEffect(() => {
-    if (data.running && data.timestamp !== '') {
+    if (data.running && data.timestamp !== "") {
       handleStartButtonClick();
     }
   }, [data.timestamp, data.running, handleStartButtonClick]);
 
-  // Handle start button click to start the loop
   const startLoop = () => {
-    setData(prevData => ({
+    setData((prevData) => ({
       ...prevData,
-      running: true
+      running: true,
     }));
     handleStartButtonClick();
   };
 
-  // Handle stop button click
   const handleStopButtonClick = () => {
-    setData(prevData => ({
+    setData((prevData) => ({
       ...prevData,
-      running: false
+      running: false,
     }));
   };
 
@@ -108,7 +124,9 @@ function App() {
         <div>
           {data && (
             <div>
-              <div><strong>Pair:</strong> {data.pair}</div>
+              <div>
+                <strong>Pair:</strong> {data.pair}
+              </div>
             </div>
           )}
         </div>
@@ -138,8 +156,12 @@ function App() {
         </div>
 
         <div className="button-row">
-          <button onClick={startLoop} disabled={data.running}>Start</button>
-          <button onClick={handleStopButtonClick} disabled={!data.running}>Stop</button>
+          <button onClick={startLoop} disabled={data.running}>
+            Start
+          </button>
+          <button onClick={handleStopButtonClick} disabled={!data.running}>
+            Stop
+          </button>
         </div>
 
         <div className="alerts-table">
@@ -169,6 +191,13 @@ function App() {
             </tbody>
           </table>
         </div>
+
+        {errorMessage && (
+          <div className="error-window">
+            <p>{errorMessage}</p>
+            <button onClick={() => setErrorMessage(null)}>Close</button>
+          </div>
+        )}
       </header>
     </div>
   );
