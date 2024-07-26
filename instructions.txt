@@ -1,0 +1,67 @@
+# db setup
+
+sudo apt-get update
+
+sudo apt-get upgrade
+
+sudo apt-get install postgresql
+
+curl https://www.pgadmin.org/static/packages_pgadmin_org.pub | sudo apt-key add
+
+sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/focal/ pgadmin4 main" > /etc/apt/sources.list.d/pgadmin4.list && apt update'
+
+sudo apt install pgadmin4
+
+# to setup the password of postgres user
+
+sudo -u postgres psql
+
+\password postgres
+
+
+# create server
+
+set name: test
+
+set hostname/address: localhost
+
+Username: postgres
+password: same as you defined earlier
+
+# in test server create a database
+
+SQL tab for creation via SQL script called eventLogger
+
+In DataBases tab select eventLogger and then Query Tool
+
+CREATE TABLE price_data (
+  id SERIAL PRIMARY KEY,
+  pair VARCHAR(10),
+  fetch_interval INTEGER,
+  price_oscillation_trigger DECIMAL,
+  price_oscillation DECIMAL,
+  price DECIMAL(10, 4),
+  timestamp TIMESTAMP
+);
+
+# query Price_data via SQL query Tool
+
+SELECT * FROM price_data;
+
+# add data manually
+
+INSERT INTO price_data (pair, fetch_interval, price_oscillation_trigger, price_oscillation, price, timestamp)
+VALUES ('BTC/USD', 60, 1.5, 2.0, 30000.1234, '2024-07-25 12:34:56');
+
+# remove data manually
+
+DELETE FROM price_data WHERE id = 1;
+
+
+# via command line connect to postgres
+
+sudo -u postgres psql
+
+\c eventLogger
+
+run queries like for the manual case
