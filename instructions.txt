@@ -78,3 +78,61 @@ run queries like for the manual case
 
 
 #dockerized application
+
+To dockerize your application, you'll need to create a Dockerfile for both the backend and frontend, as well as a docker-compose.yml file to orchestrate the services together
+Create Dockerfile in root dir for backend.
+Create Dockerfile in frontend dir for frontend.
+Create docker-compose.yml in root dir.
+change the dbConfig.js to receive env variables (from the docker compose)
+
+setup initialization script por database
+in database folder create init.SQL
+"
+-- init.sql
+CREATE TABLE IF NOT EXISTS price_data (
+    id SERIAL PRIMARY KEY,
+    pair VARCHAR(10),
+    fetch_interval INTEGER,
+    price_oscillation_trigger DECIMAL,
+    price_oscillation DECIMAL,
+    price DECIMAL(10, 4),
+    timestamp TIMESTAMP
+);
+
+-- Optionally, insert some initial data
+-- INSERT INTO price_data (pair, fetch_interval, price_oscillation_trigger, price_oscillation, price, timestamp)
+-- VALUES ('BTC-USD', 5000, 1.5, 1.2, 40000.0000, NOW());
+"
+
+update docker-compose accordingly.
+
+"
+db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: eventLogger
+    ports:
+      - "5433:5432" #using host port 5433 to avoid conflicts if posgres is running already (default port is 5432)
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+"
+
+
+then run in root
+
+docker volume rm uphold_pgdata
+
+docker volume rm uphold_pgdata
+
+docker-compose up --build
+
+
+check container database
+
+docker exec -it uphold_db_1  psql -U postgres -d eventLogger
+
+SELECT * FROM price_data;
+
