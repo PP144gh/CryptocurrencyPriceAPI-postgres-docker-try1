@@ -123,16 +123,15 @@ db:
 
 then run in root
 
-docker volume rm uphold_pgdata
+docker-compose down 
 
-docker volume rm uphold_pgdata
+docker volume rm cryptocurrencypriceapi-postgres-docker-try1_pgdata
 
 docker-compose up --build
 
 
 check container database
 
-docker exec -it uphold_db_1  psql -U postgres -d eventLogger
+docker exec -it cryptocurrencypriceapi-postgres-docker-try1_db_1 psql -U postgres -d eventLogger
 
 SELECT * FROM price_data;
-

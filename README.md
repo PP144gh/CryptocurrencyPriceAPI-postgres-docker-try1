@@ -24,6 +24,6 @@ ETH-USD 5000 0.01
 
 The alerts will show in the Alerts list, and added to a database. You can check the database entries doing:
 
-docker exec -it uphold_db_1  psql -U postgres -d eventLogger
+docker exec -it cryptocurrencypriceapi-postgres-docker-try1_db_1 psql -U postgres -d eventLogger
 
 SELECT * FROM price_data;
