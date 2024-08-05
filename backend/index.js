@@ -2,7 +2,7 @@ const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const { exec } = require('child_process');
-const pool = require('../dbConfig');  // Import the database configuration
+const pool = require('../backend/database/dbConfig');  // Import the database configuration
 
 const PORT = process.env.PORT || 3001;
 

@@ -12,6 +12,16 @@ sudo sh -c 'echo "deb https://ftp.postgresql.org/pub/pgadmin/pgadmin4/apt/focal/
 
 sudo apt install pgadmin4
 
+# run postgres
+
+docker stop postgres
+
+docker rm postgres
+
+docker pull postgres:latest
+
+docker run --name postgres -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=test -e POSTGRES_DB=eventLogger -p 5432:5432 -d postgres:latest
+
 # to setup the password of postgres user
 
 sudo -u postgres psql
@@ -65,3 +75,6 @@ sudo -u postgres psql
 \c eventLogger
 
 run queries like for the manual case
+
+
+#dockerized application
